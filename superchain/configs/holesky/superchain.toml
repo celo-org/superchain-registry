@@ -1,0 +1,8 @@
+name = "Holesky"
+protocol_versions_addr = "0x252CbE9517F731C618961D890D534183822dcC8d" # TODO
+superchain_config_addr = "0x02d91Cf852423640d93920BE0CAdceC0E7A00FA7" # TODO
+
+[l1]
+  chain_id = 17000
+  public_rpc = "https://ethereum-holesky-rpc.publicnode.com"
+  explorer = "https://holesky.etherscan.io"

@@ -1,0 +1,74 @@
+name = "Baklava"
+public_rpc = "https://baklava-forno.celo-testnet.org/"
+sequencer_rpc = "https://sequencer.baklava.celo-testnet.org"
+explorer = "https://celo-baklava.blockscout.com/"
+superchain_level = 0
+governed_by_optimism = false
+superchain_time = 0 # TODO
+data_availability_type = "alt-da"
+chain_id = 62320
+batch_inbox_addr = "0xfF00000000000000000000000000000000084532"
+block_time = 1
+seq_window_size = 7200
+max_sequencer_drift = 600
+
+[hardforks]
+  canyon_time = 0
+  delta_time = 0
+  ecotone_time = 0
+  fjord_time = 0
+  granite_time = 0
+  holocene_time = 1 # TODO
+  pectra_blob_schedule_time = 1 # TODO
+  isthmus_time = 1 # TODO
+
+[optimism]
+  eip1559_elasticity = 5
+  eip1559_denominator = 400
+  eip1559_denominator_canyon = 400
+
+[genesis]
+  l2_time = 1740081096
+  [genesis.l1]
+    hash = "0x173963bace188a0cbcff9b9d0d8a4761100e6531881ecd9da609a57b23237a1b"
+    number = 3393060
+  [genesis.l2]
+    hash = "0xd513ac2b3c3edad3be12ea9275fcfe9c78a2b329a3374c59d226e72e4b4e1def"
+    number = 28308600
+  [genesis.system_config]
+    batcherAddress = "0x242c6e6ea8e910a1835efa4caf8641769c27b595"
+    overhead = "0x0000000000000000000000000000000000000000000000000000000000000000"
+    scalar = "0x0100000000000000000000000000000000000000000000000000000000000000"
+    gasLimit = 30000000
+    eip1559Params = "0x0000000000000000"
+
+[roles]
+  SystemConfigOwner = "0x0fe884546476dDd290eC46318785046ef68a0BA9" # TODO
+  ProxyAdminOwner = "0x22EaF69162ae49605441229EdbEF7D9FC5f4f094" # TODO
+  Guardian = "0x7a50f00e8D05b95F98fE38d8BeE366a7324dCf7E" # TODO
+  Challenger = "0xDa3037Ff70Ac92CD867c683BD807e5A484857405" # TODO
+  Proposer = "0x037637067c1DbE6d2430616d8f54Cb774Daa5999" # TODO
+  UnsafeBlockSigner = "0xb830b99c95Ea32300039624Cb567d324D4b1D83C" # TODO
+  BatchSubmitter = "0xfc56E7272EEBBBA5bC6c544e159483C4a38f8bA3" # TODO
+
+[addresses]
+  AddressManager = "0x156aa732322e878E01e3fB9d6C7a3b30b267bBA4"
+  AnchorStateRegistryProxy = "0x9C4B83AED7e5103dC6F38DfA265933Fe418Ed090"
+  DelayedWETHProxy = "0x9B014033014c8C9026Dbc5151049ffFA8581942E"
+  DisputeGameFactoryProxy = "0x788ef5850c3a51d41f59Dc4327017EF8D754eD80"
+  L1CrossDomainMessengerProxy = "0x418F16753b868adDc5f0C2860b05D8b921fCee75"
+  L1ERC721BridgeProxy = "0xe65F0FE051FCe8a8De3A5c8DcFa474025F6F2D73"
+  L1StandardBridgeProxy = "0xe65F0FE051FCe8a8De3A5c8DcFa474025F6F2D73"
+  MIPS = "0x8F5a62ceb69c0D0674937DA29023b49BA279F164"
+  OptimismMintableERC20FactoryProxy = "0x8F5a62ceb69c0D0674937DA29023b49BA279F164"
+  OptimismPortalProxy = "0x8F5a62ceb69c0D0674937DA29023b49BA279F164"
+  PreimageOracle = "0x3052f7e497870bE9aD7cd2C1fFC415c5Fb8ecFC3"
+  ProxyAdmin = "0xBF101Bd81fb69aB00ab261465454dF1a171726Bf"
+  SystemConfigProxy = "0x3ee24bF404e4a5D27A437d910F56E1eD999B1De8"
+
+
+[alt_da]
+  da_challenge_contract_address = "0x0000000000000000000000000000000000000000"
+  da_challenge_window = 1
+  da_resolve_window = 1
+  da_commitment_type = "GenericCommitment"
