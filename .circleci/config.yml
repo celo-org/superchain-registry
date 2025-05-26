@@ -16,7 +16,7 @@ parameters:
     default: https://ci-mainnet-l1.optimism.io
   github_repo:
     type: string
-    default: ethereum-optimism/superchain-registry
+    default: celo-org/superchain-registry
 
 jobs:
   go-lint-test:
