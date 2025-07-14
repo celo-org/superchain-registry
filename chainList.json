@@ -272,7 +272,7 @@
       "chain": "mainnet"
     },
     "faultProofs": {
-      "status": "none"
+      "status": "permissioned"
     }
   },
   {
@@ -314,7 +314,7 @@
       "chain": "mainnet"
     },
     "faultProofs": {
-      "status": "none"
+      "status": "permissioned"
     }
   },
   {
@@ -882,7 +882,7 @@
       "chain": "sepolia"
     },
     "faultProofs": {
-      "status": "none"
+      "status": "permissioned"
     }
   },
   {
@@ -903,7 +903,7 @@
       "chain": "sepolia"
     },
     "faultProofs": {
-      "status": "none"
+      "status": "permissioned"
     }
   },
   {
@@ -1220,6 +1220,70 @@
     },
     "faultProofs": {
       "status": "none"
+    }
+  },
+  {
+    "name": "Celo",
+    "identifier": "mainnet/celo",
+    "chainId": 42220,
+    "rpc": [
+      "https://forno.celo.org"
+    ],
+    "explorers": [
+      "https://celoscan.io/"
+    ],
+    "superchainLevel": 0,
+    "governedByOptimism": false,
+    "dataAvailabilityType": "alt-da",
+    "parent": {
+      "type": "L2",
+      "chain": "mainnet"
+    },
+    "gasPayingToken": "0x057898f3C43F129a17517B9056D23851F124b19f",
+    "faultProofs": {
+      "status": "permissioned"
+    }
+  },
+  {
+    "name": "rehearsal-0-bn-0",
+    "identifier": "rehearsal-0-bn/rehearsal-0-bn-0",
+    "chainId": 420120009,
+    "rpc": [
+      ""
+    ],
+    "explorers": [
+      ""
+    ],
+    "superchainLevel": 0,
+    "governedByOptimism": false,
+    "dataAvailabilityType": "eth-da",
+    "parent": {
+      "type": "L2",
+      "chain": "rehearsal-0-bn"
+    },
+    "faultProofs": {
+      "status": "permissionless"
+    }
+  },
+  {
+    "name": "rehearsal-0-bn-1",
+    "identifier": "rehearsal-0-bn/rehearsal-0-bn-1",
+    "chainId": 420120010,
+    "rpc": [
+      ""
+    ],
+    "explorers": [
+      ""
+    ],
+    "superchainLevel": 0,
+    "governedByOptimism": false,
+    "dataAvailabilityType": "eth-da",
+    "parent": {
+      "type": "L2",
+      "chain": "rehearsal-0-bn"
+    },
+    "faultProofs": {
+      "status": "permissionless"
     }
   }
 ]

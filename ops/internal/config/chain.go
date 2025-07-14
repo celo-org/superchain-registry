@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/ethereum-optimism/optimism/op-chain-ops/addresses"
-	"github.com/ethereum-optimism/optimism/op-deployer/pkg/deployer/artifacts"
 	"github.com/ethereum-optimism/optimism/op-fetcher/pkg/fetcher/fetch/script"
 	"github.com/ethereum-optimism/optimism/op-service/jsonutil"
 	"github.com/ethereum/go-ethereum/common"
@@ -56,17 +55,14 @@ type StagedChain struct {
 	L1FeeVaultRecipient          ChecksummedAddress `toml:"l1_fee_vault_recipient"`
 	SequencerFeeVaultRecipient   ChecksummedAddress `toml:"sequencer_fee_vault_recipient"`
 	DeploymentTxHash             *common.Hash       `toml:"deployment_tx_hash"`
-	DeploymentL1ContractsVersion *artifacts.Locator `toml:"deployment_l1_contracts_version"`
-	DeploymentL2ContractsVersion *artifacts.Locator `toml:"deployment_l2_contracts_version"`
+	DeploymentL1ContractsVersion string             `toml:"deployment_l1_contracts_version"`
+	DeploymentL2ContractsVersion string             `toml:"deployment_l2_contracts_version"`
 }
 
-type Dependency struct {
-	ChainIndex     uint32 `json:"chainIndex" toml:"chain_index"`
-	ActivationTime uint64 `json:"activationTime" toml:"activation_time"`
-}
+type StaticConfigDependency struct{}
 
 type Interop struct {
-	Dependencies map[string]Dependency `json:"dependencies" toml:"dependencies"`
+	Dependencies map[string]StaticConfigDependency `json:"dependencies" toml:"dependencies"`
 }
 
 type Chain struct {
@@ -221,7 +217,7 @@ func CreateAddressesWithRolesFromFetcher(addrs script.Addresses, roles addresses
 		Roles: Roles{
 			SystemConfigOwner: NewChecksummedAddress(roles.SystemConfigOwner),
 			ProxyAdminOwner:   NewChecksummedAddress(roles.OpChainProxyAdminOwner),
-			Guardian:          NewChecksummedAddress(roles.Guardian),
+			Guardian:          NewChecksummedAddress(roles.OpChainGuardian),
 			Challenger:        NewChecksummedAddress(roles.Challenger),
 			Proposer:          NewChecksummedAddress(roles.Proposer),
 			UnsafeBlockSigner: NewChecksummedAddress(roles.UnsafeBlockSigner),

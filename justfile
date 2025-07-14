@@ -47,10 +47,16 @@ print-staging-report: (_run_ops_bin 'print_staging_report')
 
 check-genesis-integrity: (_run_ops_bin 'check_genesis_integrity')
 
-create-config SHORTNAME FILENAME:
+codegen L1_RPC_URLS SUPERCHAINS="":
+  @just _run_ops_bin "codegen" "--l1-rpc-urls {{L1_RPC_URLS}} --superchains={{SUPERCHAINS}}"
+
+create-config SHORTNAME FILENAME: build-deployer-binaries
 	@just _run_ops_bin "create_config" "--shortname {{SHORTNAME}} --state-filename $(realpath {{FILENAME}})"
 
-import-devnet STATEFILE MANIFESTFILE:
-	@just _run_ops_bin "import_devnet" "--state-filename $(realpath {{STATEFILE}}) --manifest-path $(realpath {{MANIFESTFILE}})"
+import-devnet STATEFILE MANIFESTFILE OPDEPLOYERVERSION="":  build-deployer-binaries
+	@just _run_ops_bin "import_devnet" "--state-filename $(realpath {{STATEFILE}}) --manifest-path $(realpath {{MANIFESTFILE}}) --op-deployer-version={{OPDEPLOYERVERSION}}"
+
+build-deployer-binaries:
+  @bash ops/internal/deployer/scripts/build-binaries.sh
 
 check-chainlist: (_run_ops_bin 'check_chainlist')

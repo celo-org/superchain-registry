@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
-	"github.com/ethereum-optimism/optimism/op-deployer/pkg/deployer/state"
-	"github.com/ethereum-optimism/superchain-registry/ops/internal/config"
+	"github.com/ethereum-optimism/superchain-registry/ops/internal/deployer"
 	"github.com/ethereum-optimism/superchain-registry/ops/internal/manage"
 	"github.com/ethereum-optimism/superchain-registry/ops/internal/output"
 	"github.com/ethereum-optimism/superchain-registry/ops/internal/paths"
@@ -27,6 +27,17 @@ var (
 		Required:  true,
 		TakesFile: true,
 	}
+	OpDeployerVersion = &cli.StringFlag{
+		Name:     "op-deployer-version",
+		Usage:    "Version of op-deployer used to deploy the chain(s). If not provided, the version will be inferred from the state file.",
+		Required: false,
+	}
+	OpDeployerBinDir = &cli.StringFlag{
+		Name:    "op-deployer-bin-dir",
+		Usage:   "Path to the directory containing op-deployer binaries.",
+		EnvVars: []string{"DEPLOYER_CACHE_DIR"},
+		Value:   defaultBinDir(),
+	}
 )
 
 func main() {
@@ -36,6 +47,8 @@ func main() {
 		Flags: []cli.Flag{
 			StatePath,
 			ManifestPath,
+			OpDeployerVersion,
+			OpDeployerBinDir,
 		},
 		Action: action,
 	}
@@ -53,10 +66,6 @@ func action(cliCtx *cli.Context) error {
 
 	statePath := cliCtx.String(StatePath.Name)
 	output.WriteStderr("reading state file from %s", statePath)
-	var st state.State
-	if err := paths.ReadJSONFile(statePath, &st); err != nil {
-		return fmt.Errorf("failed to read state file: %w", err)
-	}
 
 	type manifest struct {
 		Name string `yaml:"name"`
@@ -72,36 +81,52 @@ func action(cliCtx *cli.Context) error {
 		return fmt.Errorf("failed to read manifest file: %w", err)
 	}
 
-	if len(m.L2.Chains) != len(st.AppliedIntent.Chains) {
-		return fmt.Errorf(
-			"number of chains in manifest file (%d) does not match number of chains in state file (%d)",
-			len(m.L2.Chains), len(st.AppliedIntent.Chains))
+	st, err := deployer.ReadOpaqueStateFile(statePath)
+	if err != nil {
+		return fmt.Errorf("failed to read opaque state file: %w", err)
+	}
+
+	numChains, err := st.GetNumChains()
+	if err != nil {
+		return fmt.Errorf("failed to read number of chains: %w", err)
+	}
+	if numChains != len(m.L2.Chains) {
+		return fmt.Errorf("number of chains in manifest file (%d) does not match number of chains in state file (%d)", len(m.L2.Chains), numChains)
 	}
 
 	output.WriteOK("inflating chain configs")
-	for i := 0; i < len(st.AppliedIntent.Chains); i++ {
-		if m.L2.Chains[i].ChainID != int64(st.AppliedIntent.Chains[i].ID.Big().Int64()) {
+	opDeployerVersion := cliCtx.String(OpDeployerVersion.Name)
+	opDeployerBinDir := cliCtx.String(OpDeployerBinDir.Name)
+	for i := 0; i < numChains; i++ {
+		chainID, err := st.GetChainID(i)
+		if err != nil {
+			return fmt.Errorf("failed to read chain id: %w", err)
+		}
+		chain := m.L2.Chains[i]
+		if chain.ChainID != int64(chainID) {
 			return fmt.Errorf("chain ID mismatch for chain at index %d : manifest %d, state %d",
 				i,
-				m.L2.Chains[i].ChainID, st.AppliedIntent.Chains[i].ID.Big().Int64())
+				chain.ChainID, chainID)
 		}
-		err = manage.GenerateChainArtifacts(st, wd, m.L2.Chains[i].Name, &m.L2.Chains[i].Name, &m.Name, i)
-		if err != nil {
+		if err := manage.GenerateChainArtifacts(
+			statePath,
+			wd,
+			chain.Name,
+			&chain.Name,
+			&m.Name,
+			i,
+			opDeployerVersion,
+			opDeployerBinDir,
+		); err != nil {
 			return fmt.Errorf("failed to generate chain config: %w", err)
 		}
 	}
 
 	output.WriteOK("writing superchain definition file")
 
-	sD := config.SuperchainDefinition{
-		Name:                   m.Name,
-		ProtocolVersionsAddr:   config.NewChecksummedAddress(st.SuperchainDeployment.ProtocolVersionsProxyAddress),
-		SuperchainConfigAddr:   config.NewChecksummedAddress(st.SuperchainDeployment.SuperchainConfigProxyAddress),
-		OPContractsManagerAddr: config.NewChecksummedAddress(st.ImplementationsDeployment.OpcmAddress),
-		Hardforks:              config.Hardforks{}, // superchain wide hardforks are added after chains are in the registry.
-		L1: config.SuperchainL1{
-			ChainID: st.AppliedIntent.L1ChainID,
-		},
+	sD, err := manage.InflateSuperchainDefinition(m.Name, st)
+	if err != nil {
+		return fmt.Errorf("failed to inflate superchain definition: %w", err)
 	}
 
 	// Validation and conflict resolution will be handled
@@ -113,4 +138,13 @@ func action(cliCtx *cli.Context) error {
 
 	output.WriteOK("done")
 	return nil
+}
+
+func defaultBinDir() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Sprintf("failed to get home directory: %v", err))
+	}
+
+	return filepath.Join(homeDir, ".cache", "op-deployer")
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ethereum-optimism/optimism/op-service/eth"
 	"github.com/ethereum-optimism/superchain-registry/ops/internal/config"
@@ -12,11 +13,9 @@ import (
 )
 
 var (
-	errInvalidActivationTime = errors.New("activation_time is before interop_time")
-	errDepsetLengths         = errors.New("inconsistent depset lengths")
-	errInconsistentDepsets   = errors.New("inconsistent depset values")
-	errMissingAddress        = errors.New("missing address")
-	errDuplicateChainIndex   = errors.New("duplicate chain index")
+	errDepsetLengths       = errors.New("inconsistent depset lengths")
+	errInconsistentDepsets = errors.New("inconsistent depset values")
+	errMissingAddress      = errors.New("missing address")
 )
 
 type DepsetChecker struct {
@@ -104,22 +103,11 @@ func (dc *DepsetChecker) checkOffchain(cfgs []DiskChainConfig) error {
 	}
 
 	var firstSuperchain string
-	var firstDepset map[string]config.Dependency
+	var firstDepset map[string]config.StaticConfigDependency
 	for i, cfg := range cfgs {
 		if i == 0 {
 			firstSuperchain = cfg.Superchain
 			firstDepset = cfg.Config.Interop.Dependencies
-
-			// Check for duplicate chain indices in the first config
-			chainIndices := make(map[uint32]string, len(firstDepset))
-			for chainID, dep := range firstDepset {
-				if existingChainID, exists := chainIndices[dep.ChainIndex]; exists {
-					return fmt.Errorf("%w: index %d used for chains %s and %s",
-						errDuplicateChainIndex, dep.ChainIndex, existingChainID, chainID)
-				}
-				chainIndices[dep.ChainIndex] = chainID
-			}
-
 		}
 
 		// check that all chains in the depset are part of the same superchain
@@ -127,22 +115,8 @@ func (dc *DepsetChecker) checkOffchain(cfgs []DiskChainConfig) error {
 			return fmt.Errorf("chain %d is part of superchain %s, expected superchain %s", cfg.Config.ChainID, cfg.Superchain, firstSuperchain)
 		}
 
-		// check that activation_time is valid
+		// check equality of dependency sets
 		thisDepset := cfg.Config.Interop.Dependencies
-		chainId := strconv.FormatUint(cfg.Config.ChainID, 10)
-		if cfg.Config.Hardforks.InteropTime == nil {
-			return fmt.Errorf("chain %d has no hardfork timestamp for interop", cfg.Config.ChainID)
-		}
-		interopTime := *cfg.Config.Hardforks.InteropTime.U64Ptr()
-		if thisDepset[chainId].ActivationTime < interopTime {
-			return fmt.Errorf("%w: chainId %d, activation_time %d interop_time %d",
-				errInvalidActivationTime,
-				cfg.Config.ChainID,
-				thisDepset[chainId].ActivationTime,
-				interopTime)
-		}
-
-		// check deep equality of dependency sets
 		if i > 0 {
 			// 1. check if the maps have the same length
 			if len(firstDepset) != len(thisDepset) {
@@ -151,24 +125,13 @@ func (dc *DepsetChecker) checkOffchain(cfgs []DiskChainConfig) error {
 					cfg.Config.ChainID, len(thisDepset), len(firstDepset))
 			}
 
-			// 2. check for deep equality of dependency values
-			for chainID, dep := range firstDepset {
-				otherDep, exists := thisDepset[chainID]
+			// 2. check that depset members are the same across all configs
+			for chainID := range firstDepset {
+				_, exists := thisDepset[chainID]
 				if !exists {
 					return fmt.Errorf("%w: chain %d is missing (transitive) dependency for chain ID %s (direct dependency of %d)",
 						errInconsistentDepsets,
 						cfg.Config.ChainID, chainID, cfgs[0].Config.ChainID)
-				}
-
-				if dep.ChainIndex != otherDep.ChainIndex {
-					return fmt.Errorf("%w: chain %d has different chain index for dependency %s (%d vs %d)",
-						errInconsistentDepsets,
-						cfg.Config.ChainID, chainID, otherDep.ChainIndex, dep.ChainIndex)
-				}
-				if dep.ActivationTime != otherDep.ActivationTime {
-					return fmt.Errorf("%w: chain %d has different activation time for dependency %s (%d vs %d)",
-						errInconsistentDepsets,
-						cfg.Config.ChainID, chainID, otherDep.ActivationTime, dep.ActivationTime)
 				}
 			}
 		}
@@ -178,7 +141,8 @@ func (dc *DepsetChecker) checkOffchain(cfgs []DiskChainConfig) error {
 }
 
 // checkOnchain ensures that DisputeGameFactoryProxy and EthLockboxProxy addresses read from onchain
-// are the same for all chains in a depset
+// are the same for all chains in a depset. These checks are only performed for chains who have
+// already activated interop (i.e. interop_time < current unix timestamp).
 func (dc *DepsetChecker) checkOnchain(cfgs []DiskChainConfig) error {
 	if len(cfgs) == 0 {
 		return fmt.Errorf("no chain configs provided to checkOnchain")
@@ -188,19 +152,35 @@ func (dc *DepsetChecker) checkOnchain(cfgs []DiskChainConfig) error {
 		return nil
 	}
 
-	// Get and validate the first chain's addresses
-	firstAddrs, err := dc.getAndValidateAddresses(cfgs[0].Config.ChainID)
+	// Find chains that have already activated interop
+	now := time.Now().Unix()
+	var activatedChains []DiskChainConfig
+	for _, cfg := range cfgs {
+		interopTime := cfg.Config.Hardforks.InteropTime
+		if interopTime == nil || *interopTime.U64Ptr() > uint64(now) {
+			continue
+		}
+		activatedChains = append(activatedChains, cfg)
+	}
+
+	// If we have fewer than 2 activated chains, no comparison needed
+	if len(activatedChains) < 2 {
+		dc.lgr.Info("skipping onchain checks for depset")
+		return nil
+	}
+
+	// Get and validate the first valid chain's addresses
+	firstAddrs, err := dc.getAndValidateAddresses(activatedChains[0].Config.ChainID)
 	if err != nil {
 		return err
 	}
 
 	firstDisputeGameFactoryProxy := strings.ToLower((*firstAddrs.DisputeGameFactoryProxy).String())
-	// TODO: re-enable this once we can pull in the updated op-fetcher from monorepo
-	// issue: https://github.com/ethereum-optimism/optimism/issues/16058
-	// firstEthLockboxProxy := strings.ToLower((*firstAddrs.EthLockboxProxy).String())
+	firstEthLockboxProxy := strings.ToLower((*firstAddrs.EthLockboxProxy).String())
 
-	// Check all chains in the dependency set
-	for _, cfg := range cfgs {
+	// Check all remaining valid chains in the dependency set
+	for i := 1; i < len(activatedChains); i++ {
+		cfg := activatedChains[i]
 		addrs, err := dc.getAndValidateAddresses(cfg.Config.ChainID)
 		if err != nil {
 			return err
@@ -210,12 +190,10 @@ func (dc *DepsetChecker) checkOnchain(cfgs []DiskChainConfig) error {
 			return fmt.Errorf("DisputeGameFactoryProxy address mismatch for chain %d, expected %s, got %s",
 				cfg.Config.ChainID, firstDisputeGameFactoryProxy, addrs.DisputeGameFactoryProxy)
 		}
-		// TODO: re-enable this once we can pull in the updated op-fetcher from monorepo
-		// issue: https://github.com/ethereum-optimism/optimism/issues/16058
-		//if strings.ToLower((*addrs.EthLockboxProxy).String()) != firstEthLockboxProxy {
-		//	return fmt.Errorf("EthLockboxProxy address mismatch for chain %d, expected %s, got %s",
-		//		cfg.Config.ChainID, firstEthLockboxProxy, addrs.EthLockboxProxy)
-		//}
+		if strings.ToLower((*addrs.EthLockboxProxy).String()) != firstEthLockboxProxy {
+			return fmt.Errorf("EthLockboxProxy address mismatch for chain %d, expected %s, got %s",
+				cfg.Config.ChainID, firstEthLockboxProxy, addrs.EthLockboxProxy)
+		}
 	}
 
 	return nil
@@ -237,10 +215,8 @@ func (dc *DepsetChecker) getAndValidateAddresses(chainID uint64) (*config.Addres
 	if addrs.DisputeGameFactoryProxy == nil || *addrs.DisputeGameFactoryProxy == zeroAddress {
 		return nil, fmt.Errorf("%w: no DisputeGameFactoryProxy found for chain %d", errMissingAddress, chainID)
 	}
-	// TODO: re-enable this once we can pull in the updated op-fetcher from monorepo
-	// issue: https://github.com/ethereum-optimism/optimism/issues/16058
-	//if addrs.EthLockboxProxy == nil || *addrs.EthLockboxProxy == zeroAddress {
-	//return nil, fmt.Errorf("%w: no EthLockboxProxy found for chain %d", errMissingAddress, chainID)
-	//}
+	if addrs.EthLockboxProxy == nil || *addrs.EthLockboxProxy == zeroAddress {
+		return nil, fmt.Errorf("%w: no EthLockboxProxy found for chain %d", errMissingAddress, chainID)
+	}
 	return addrs, nil
 }
