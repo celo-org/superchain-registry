@@ -19,6 +19,12 @@ gas_paying_token = "0x3C7011fD5e6Aed460cAa4985cF8d8Caba435b092"
   fjord_time = 0 # Thu 1 Jan 1970 00:00:00 UTC
   granite_time = 0 # Thu 1 Jan 1970 00:00:00 UTC
   holocene_time = 0 # Thu 1 Jan 1970 00:00:00 UTC
+  isthmus_time = 0 # Thu 1 Jan 1970 00:00:00 UTC
+  cel2_time = 0 # Thu 1 Jan 1970 00:00:00 UTC
+  gingerbread_block = 0
+
+[celo]
+  eip1559_base_fee_floor = 25000000000
 
 [optimism]
   eip1559_elasticity = 5
@@ -37,7 +43,7 @@ gas_paying_token = "0x3C7011fD5e6Aed460cAa4985cF8d8Caba435b092"
     hash = "0xeed417004236aa692023c216e8f1bd2185ac87a70c6f4393099f9c3777f05675"
     number = 8825790
   [genesis.l2]
-    hash = "0x1b65cd292881564a4ba788e0822ef07f6dd558c76466ee9d1f07b57065b392f4"
+    hash = "0xabcc77fb92a7ea1e7d330042d81200585d251355b33408ed1c27fb54175b1fe2"
     number = 0
   [genesis.system_config]
     batcherAddress = "0xE80D3F16E4D44A5127E1BD6ad9ed4E17A96475F0"
