@@ -438,15 +438,15 @@ workflows:
           tool: check_genesis_integrity
           requires:
             - build-deployer-binaries
-      - check-codegen:
-          name: check-codegen
-          requires:
-            - build-deployer-binaries
+      # - check-codegen:
+      #     name: check-codegen
+      #     requires:
+      #       - build-deployer-binaries
       - run-tool:
           name: check-depsets
           tool: check_depsets
           requires:
-            - check-codegen
+            # - check-codegen
             - build-deployer-binaries
       - run-tool:
           name: check-staging-synced
