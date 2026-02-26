@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  utils: ethereum-optimism/circleci-utils@1.0.22
+  utils: piersy/circleci-utils@1.0.23
 
 executors:
   default:
