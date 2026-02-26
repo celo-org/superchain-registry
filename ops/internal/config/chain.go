@@ -83,6 +83,7 @@ type Chain struct {
 	Hardforks            Hardforks           `toml:"hardforks"`
 	Interop              *Interop            `toml:"interop,omitempty"`
 	Optimism             Optimism            `toml:"optimism"`
+	Celo                 *Celo               `toml:"celo,omitempty"`
 	AltDA                *AltDA              `toml:"alt_da"`
 	Genesis              Genesis             `toml:"genesis"`
 	Roles                Roles               `toml:"roles"`
@@ -118,6 +119,9 @@ type Hardforks struct {
 	IsthmusTime            *HardforkTime `toml:"isthmus_time"`
 	InteropTime            *HardforkTime `toml:"interop_time"`
 	JovianTime             *HardforkTime `toml:"jovian_time"`
+	// Celo-specific forks
+	Cel2Time         *HardforkTime `toml:"cel2_time,omitempty"`
+	GingerbreadBlock *uint64       `toml:"gingerbread_block,omitempty"`
 }
 
 type Genesis struct {
@@ -146,6 +150,10 @@ type AltDA struct {
 	DaChallengeWindow          uint64             `toml:"da_challenge_window"`
 	DaResolveWindow            uint64             `toml:"da_resolve_window"`
 	DaCommitmentType           string             `toml:"da_commitment_type"`
+}
+
+type Celo struct {
+	EIP1559BaseFeeFloor uint64 `toml:"eip1559_base_fee_floor"`
 }
 
 type Optimism struct {

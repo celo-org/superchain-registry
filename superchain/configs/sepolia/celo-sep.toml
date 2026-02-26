@@ -23,13 +23,13 @@ gas_paying_token = "0x3C7011fD5e6Aed460cAa4985cF8d8Caba435b092"
   cel2_time = 0 # Thu 1 Jan 1970 00:00:00 UTC
   gingerbread_block = 0
 
-[celo]
-  eip1559_base_fee_floor = 25000000000
-
 [optimism]
   eip1559_elasticity = 5
   eip1559_denominator = 400
   eip1559_denominator_canyon = 250
+
+[celo]
+  eip1559_base_fee_floor = 25000000000
 
 [alt_da]
   da_challenge_contract_address = "0x0000000000000000000000000000000000000000"
