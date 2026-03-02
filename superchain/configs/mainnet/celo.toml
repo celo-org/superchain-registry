@@ -31,6 +31,12 @@ gas_paying_token = "0x057898f3C43F129a17517B9056D23851F124b19f"
 [celo]
   eip1559_base_fee_floor = 25000000000
 
+[alt_da]
+  da_challenge_contract_address = "0x0000000000000000000000000000000000000000"
+  da_challenge_window = 1
+  da_resolve_window = 1
+  da_commitment_type = "GenericCommitment"
+
 [genesis]
   l2_time = 1742957258
   [genesis.l1]
