@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -200,6 +201,45 @@ func TestCodegenSyncer_UpdateChainList(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestCodegenSyncer_UpdateChainListSuperGameTypes(t *testing.T) {
+	chainCfgs := createTestChainConfigs(t)
+	var testChainID uint64
+	for id := range chainCfgs {
+		testChainID = id
+		break
+	}
+
+	for _, test := range []struct {
+		name              string
+		respectedGameType uint32
+		expectedStatus    string
+	}{
+		{name: "super permissioned", respectedGameType: 5, expectedStatus: "permissioned"},
+		{name: "super cannon kona", respectedGameType: 9, expectedStatus: "permissionless"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			lgr := log.NewLogger(log.DiscardHandler())
+			syncer, err := NewCodegenSyncer(lgr, "testdata", chainCfgs)
+			require.NoError(t, err)
+
+			err = syncer.UpdateChainList(fmt.Sprintf("%d", testChainID), script.ChainConfig{
+				FaultProofStatus: &script.FaultProofStatus{
+					RespectedGameType: test.respectedGameType,
+				},
+			})
+			require.NoError(t, err)
+
+			for _, chain := range syncer.ChainList {
+				if chain.ChainID == testChainID {
+					require.Equal(t, test.expectedStatus, chain.FaultProofs.Status)
+					return
+				}
+			}
+			require.Fail(t, "test chain not found")
+		})
+	}
+}
+
 func TestCodegenSyncer_SyncAll(t *testing.T) {
 	tempDir := t.TempDir()
 	chainCfgs := createTestChainConfigs(t)
@@ -260,4 +300,73 @@ func TestCodegenSyncer_SyncAll(t *testing.T) {
 
 	_, err = os.Stat(filepath.Join(tempDir, "CHAINS.md"))
 	require.NoError(t, err)
+}
+
+func TestCodegenSyncer_SyncAllUpdatesExistingAndPrunesRemovedChain(t *testing.T) {
+	inputDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	copyFile := func(src, dst string) {
+		t.Helper()
+		data, err := os.ReadFile(src)
+		require.NoError(t, err)
+		require.NoError(t, os.MkdirAll(filepath.Dir(dst), 0o755))
+		require.NoError(t, os.WriteFile(dst, data, 0o644))
+	}
+
+	for _, filename := range []string{"superchain.toml", "op.toml", "testchain.toml"} {
+		copyFile(
+			filepath.Join("testdata", "superchain", "configs", "sepolia", filename),
+			filepath.Join(inputDir, "superchain", "configs", "sepolia", filename),
+		)
+	}
+
+	const removedChainID = uint64(999)
+	chainList := loadTestChainList(t)
+	chainList = append(chainList, config.ChainListEntry{ChainID: removedChainID})
+	chainListData, err := json.Marshal(chainList)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(paths.ChainListJsonFile(inputDir), chainListData, 0o644))
+
+	addresses := loadTestAddressesJSON(t)
+	addresses[strconv.FormatUint(removedChainID, 10)] = &config.AddressesWithRoles{}
+	addressesData, err := json.Marshal(addresses)
+	require.NoError(t, err)
+	require.NoError(t, os.MkdirAll(filepath.Dir(paths.AddressesFile(inputDir)), 0o755))
+	require.NoError(t, os.WriteFile(paths.AddressesFile(inputDir), addressesData, 0o644))
+
+	chainCfgs := createTestChainConfigs(t)
+	var updatedChainID uint64
+	for chainID, chainCfg := range chainCfgs {
+		updatedChainID = chainID
+		chainCfg.FaultProofStatus = &script.FaultProofStatus{RespectedGameType: 0}
+		chainCfgs = map[uint64]script.ChainConfig{chainID: chainCfg}
+		break
+	}
+
+	lgr := log.NewLogger(log.DiscardHandler())
+	syncer, err := NewCodegenSyncer(lgr, inputDir, chainCfgs, WithOutputDirectory(outputDir))
+	require.NoError(t, err)
+	require.NoError(t, syncer.SyncAll())
+
+	data, err := os.ReadFile(paths.ChainListJsonFile(outputDir))
+	require.NoError(t, err)
+	var gotChainList []config.ChainListEntry
+	require.NoError(t, json.Unmarshal(data, &gotChainList))
+
+	foundUpdatedChain := false
+	for _, entry := range gotChainList {
+		require.NotEqual(t, removedChainID, entry.ChainID)
+		if entry.ChainID == updatedChainID {
+			require.Equal(t, "permissionless", entry.FaultProofs.Status)
+			foundUpdatedChain = true
+		}
+	}
+	require.True(t, foundUpdatedChain)
+
+	data, err = os.ReadFile(paths.AddressesFile(outputDir))
+	require.NoError(t, err)
+	var gotAddresses config.AddressesJSON
+	require.NoError(t, json.Unmarshal(data, &gotAddresses))
+	require.NotContains(t, gotAddresses, strconv.FormatUint(removedChainID, 10))
 }

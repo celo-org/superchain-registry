@@ -21,7 +21,7 @@ The Superchain Registry repository contains:
 A superchain target defines a set of layer 2 chains which share a `SuperchainConfig` and `ProtocolVersions` contract deployment on layer 1. It is usually named after the layer 1 chain, possibly with an extra identifier to distinguish devnets.
 
 > **Note**
-> Example: `sepolia` and `sepolia-dev-0` are distinct superchain targets, although they are on the same layer 1 chain.
+> Example: `sepolia` and `sepolia-devnet-2` are distinct superchain targets, although they are on the same layer 1 chain.
 
 ### Adding a superchain target
 
@@ -46,12 +46,11 @@ l1:
   public_rpc: https://ethereum-goerli-rpc.allthatnode.com
   explorer: https://eth-goerli.blockscout.com
 
-protocol_versions_addr: null # todo
 superchain_config_addr: null # todo
 EOF
 ```
 
-Superchain-wide configuration, like the `ProtocolVersions` contract address, should be configured here when available.
+Superchain-wide configuration, like the `SuperchainConfig` contract address, should be configured here when available.
 
 ## `superchain` Go Module
 

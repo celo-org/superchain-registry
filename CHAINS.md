@@ -6,7 +6,6 @@
 |---|---|---|---|---|---|
 | Automata Mainnet | ❌ | ❌ | https://explorer.ata.network | `https://rpc.ata.network` | `https://automata-mainnet.alt.technology/` |
 | BOB | ❌ | ❌ | https://explorer.gobob.xyz | `https://rpc.gobob.xyz` | `https://rpc.gobob.xyz` |
-| Base | ❌ | ✅ | https://explorer.base.org | `https://mainnet.base.org` | `https://mainnet-sequencer.base.org` |
 | Binary Mainnet | ❌ | ✅ | https://explorer.thebinaryholdings.com | `https://rpc.zero.thebinaryholdings.com` | `https://sequencer.bnry.mainnet.zeeve.net` |
 | Boba Mainnet | ❌ | ❌ | https://bobascan.com | `https://mainnet.boba.network` | `https://mainnet.boba.network` |
 | Celo | ❌ | ❌ | https://celoscan.io/ | `https://forno.celo.org` | `https://cel2-sequencer.celo.org/` |
@@ -32,30 +31,19 @@
 | Soneium | ✅ | ✅ | https://soneium.blockscout.com/ | `https://rpc.soneium.org` | `https://rpc.soneium.org` |
 | Superseed | ❌ | ❌ | https://explorer.superseed.xyz | `https://mainnet.superseed.xyz` | `https://mainnet.superseed.xyz` |
 | Swan Chain Mainnet | ❌ | ❌ | https://swanscan.io | `https://mainnet-rpc.swanchain.org` | `https://sequencer-mainnet.swanchain.org` |
-| Swellchain | ✅ | ✅ | https://explorer.swellnetwork.io | `https://swell-mainnet.alt.technology` | `https://swell-mainnet.alt.technology` |
 | Unichain | ✅ | ✅ | https://explorer.unichain.org | `https://mainnet.unichain.org` | `https://mainnet-sequencer.unichain.org` |
 | World Chain | ❌ | ❌ | https://worldchain-mainnet.explorer.alchemy.com/ | `https://worldchain-mainnet.g.alchemy.com/public` | `https://worldchain-mainnet-sequencer.g.alchemy.com` |
 | Xterio Chain (ETH) | ❌ | ❌ | https://eth.xterscan.io/ | `https://xterio-eth.alt.technology/` | `https://xterio-eth.alt.technology/` |
 | Zora | ✅ | ✅ | https://explorer.zora.energy | `https://rpc.zora.energy` | `https://rpc.zora.energy` |
-| arena-z | ✅ | ✅ | https://explorer.arena-z.gg | `https://rpc.arena-z.gg` | `https://rpc.arena-z.gg` |
-### rehearsal-0-bn
-
-| Chain Name | OP Governed[^1] | Superchain Hardforks[^2] | Explorer | Public RPC | Sequencer RPC
-|---|---|---|---|---|---|
-| rehearsal-0-bn-0 | ❌ | ✅ |  | `` | `` |
-| rehearsal-0-bn-1 | ❌ | ✅ |  | `` | `` |
 ### sepolia
 
 | Chain Name | OP Governed[^1] | Superchain Hardforks[^2] | Explorer | Public RPC | Sequencer RPC
 |---|---|---|---|---|---|
-| Base Sepolia Testnet | ❌ | ✅ | https://sepolia-explorer.base.org | `https://sepolia.base.org` | `https://sepolia-sequencer.base.org` |
 | Binary Sepolia | ❌ | ❌ | https://explorer.sepolia.thebinaryholdings.com | `https://rpc.testnet.thebinaryholdings.com` | `https://sequencer.rpc.bnry.testnet.zeeve.net` |
 | Boba Sepolia Testnet | ❌ | ❌ | https://testnet.bobascan.com | `https://sepolia.boba.network` | `https://sepolia.boba.network` |
 | Camp Network Testnet V2 | ❌ | ❌ | https://camp-network-testnet.blockscout.com | `https://rpc.camp-network-testnet.gelato.digital` | `https://rpc.camp-network-testnet.gelato.digital` |
 | Celo Sepolia Testnet | ❌ | ❌ | https://celo-sepolia.blockscout.com | `https://forno.celo-sepolia.celo-testnet.org` | `https://forno.celo-sepolia.celo-testnet.org` |
-| Creator Chain Testnet | ❌ | ✅ | https://explorer.creatorchain.io | `https://rpc.creatorchain.io` | `https://rpc.creatorchain.io` |
 | Cyber Testnet | ❌ | ❌ | https://testnet.cyberscan.co/ | `https://rpc.testnet.cyber.co` | `https://cyber.alt.technology/` |
-| Ethernity Testnet | ❌ | ✅ | https://testnet.ernscan.io | `https://testnet.ethernitychain.io` | `https://testnet.ethernitychain.io` |
 | Funki Sepolia Testnet | ❌ | ❌ | https://sepolia-sandbox.funkichain.com/ | `https://funki-testnet.alt.technology` | `https://funki-testnet.alt.technology` |
 | Ink Sepolia | ✅ | ✅ | https://explorer-sepolia.inkonchain.com | `https://rpc-gel-sepolia.inkonchain.com` | `https://rpc-gel-sepolia.inkonchain.com` |
 | Lisk Sepolia Testnet | ❌ | ✅ | https://sepolia-blockscout.lisk.com | `https://rpc.sepolia-api.lisk.com` | `https://rpc.sepolia-api.lisk.com` |
@@ -72,13 +60,11 @@
 | Unichain Sepolia Testnet | ✅ | ✅ | https://sepolia.uniscan.xyz | `https://sepolia.unichain.org` | `https://sepolia-sequencer.unichain.org` |
 | World Chain Sepolia Testnet | ❌ | ❌ | https://worldchain-sepolia.explorer.alchemy.com/ | `https://worldchain-sepolia.g.alchemy.com/public` | `https://worldchain-sepolia-sequencer.g.alchemy.com` |
 | Zora Sepolia Testnet | ✅ | ✅ | https://sepolia.explorer.zora.energy | `https://sepolia.rpc.zora.energy` | `https://sepolia.rpc.zora.energy` |
-| arena-z-testnet | ✅ | ✅ | https://testnet-explorer.arena-z.gg | `https://testnet-rpc.arena-z.gg` | `https://testnet-rpc.arena-z.gg` |
-### sepolia-dev-0
+### sepolia-devnet-2
 
 | Chain Name | OP Governed[^1] | Superchain Hardforks[^2] | Explorer | Public RPC | Sequencer RPC
 |---|---|---|---|---|---|
-| Base devnet 0 | ❌ | ✅ |  | `` | `` |
-| OP Labs Sepolia devnet 0 | ✅ | ✅ |  | `` | `` |
+| sepolia-devnet-2 | ❌ | ✅ |  | `https://sepolia-devnet-2.optimism.io/rpc` | `` |
 
 
 [^1]: Chains are governed by Optimism if their `L1ProxyAdminOwner` is set to the value specified by the standard config and [configurability.md](https://github.com/ethereum-optimism/specs/blob/main/specs/protocol/configurability.md#l1-proxyadmin-owner).

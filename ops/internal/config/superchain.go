@@ -12,9 +12,9 @@ import (
 type Superchain = string
 
 const (
-	MainnetSuperchain     Superchain = "mainnet"
-	SepoliaSuperchain     Superchain = "sepolia"
-	SepoliaDev0Superchain Superchain = "sepolia-dev-0"
+	MainnetSuperchain        Superchain = "mainnet"
+	SepoliaSuperchain        Superchain = "sepolia"
+	SepoliaDevnet2Superchain Superchain = "sepolia-devnet-2"
 )
 
 // FindValidL1URL finds a valid l1-rpc-url for a given superchain by finding matching l1 chainId
@@ -69,7 +69,6 @@ func getL1ChainId(ctx context.Context, rpcURL string) (uint64, error) {
 
 type SuperchainDefinition struct {
 	Name                   string              `toml:"name"`
-	ProtocolVersionsAddr   *ChecksummedAddress `toml:"protocol_versions_addr"`
 	SuperchainConfigAddr   *ChecksummedAddress `toml:"superchain_config_addr"`
 	OPContractsManagerAddr *ChecksummedAddress `toml:"op_contracts_manager_addr"`
 	Hardforks              Hardforks           `toml:"hardforks"`

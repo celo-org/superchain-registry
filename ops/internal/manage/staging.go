@@ -53,10 +53,6 @@ func InflateChainConfig(opd *deployer.OpDeployer, st deployer.OpaqueState, state
 	cfg.L1FeeVaultRecipient = *config.NewChecksummedAddress(dc.L1FeeVaultRecipient)
 	cfg.SequencerFeeVaultRecipient = *config.NewChecksummedAddress(dc.SequencerFeeVaultRecipient)
 
-	if dc.CustomGasTokenAddress != (common.Address{}) {
-		cfg.GasPayingToken = config.NewChecksummedAddress(dc.CustomGasTokenAddress)
-	}
-
 	if err := CopyDeployConfigHFTimes(&dc.UpgradeScheduleDeployConfig, &cfg.Hardforks); err != nil {
 		return nil, fmt.Errorf("failed to copy deploy config hardfork times: %w", err)
 	}
@@ -182,10 +178,6 @@ var (
 )
 
 func InflateSuperchainDefinition(name string, st deployer.OpaqueState) (*config.SuperchainDefinition, error) {
-	protocolVersionsProxyAddress, err := st.ReadProtocolVersionsProxy()
-	if err != nil {
-		return nil, fmt.Errorf("failed to read protocol versions proxy address: %w", err)
-	}
 	superchainConfigProxyAddress, err := st.ReadSuperchainConfigProxy()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read superchain config proxy address: %w", err)
@@ -202,7 +194,6 @@ func InflateSuperchainDefinition(name string, st deployer.OpaqueState) (*config.
 
 	sD := config.SuperchainDefinition{
 		Name:                   name,
-		ProtocolVersionsAddr:   config.NewChecksummedAddress(protocolVersionsProxyAddress),
 		SuperchainConfigAddr:   config.NewChecksummedAddress(superchainConfigProxyAddress),
 		OPContractsManagerAddr: config.NewChecksummedAddress(opcmAddress),
 		Hardforks:              config.Hardforks{}, // superchain wide hardforks are added after chains are in the registry.

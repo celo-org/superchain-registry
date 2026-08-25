@@ -2,7 +2,6 @@ name = "Ink"
 public_rpc = "https://rpc-gel.inkonchain.com"
 sequencer_rpc = "https://rpc-gel.inkonchain.com"
 explorer = "https://explorer.inkonchain.com"
-superchain_level = 1
 governed_by_optimism = true
 superchain_time = 1742396400
 data_availability_type = "eth-da"
@@ -21,6 +20,8 @@ max_sequencer_drift = 600
   holocene_time = 1742396400 # Wed 19 Mar 2025 15:00:00 UTC
   isthmus_time = 1746806401 # Fri 9 May 2025 16:00:01 UTC
   jovian_time = 1764691201 # Tue 2 Dec 2025 16:00:01 UTC
+  karst_time = 1783526401 # Wed 8 Jul 2026 16:00:01 UTC
+  keep_karst_upgrade_gas = true
 
 [optimism]
   eip1559_elasticity = 6
